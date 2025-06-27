@@ -1,0 +1,99 @@
+usage: pando MODULE [OPTIONS] ITEM1, ITEM2, ...
+
+MODULE is the file path to a Node.js module. The module must export an object
+with a property '/pando/1.0.0'. This property must be a function that takes a
+single value and a callback as arguments.
+
+OPTIONS (default?):
+    --headless  (false, Boolean)
+                Start electron-wrtc without access to a graphical environment
+
+    --host=HOST (true, HOST='localhost', String)
+                Hostname of the bootstrap server. Can be supplied as
+                'hostname' or 'ipaddr:port'. If HOST is set to null,
+                the pando-server is started within the same process.
+
+    --port=PORT (true, PORT=5000, Number) 
+                Port used by pando-server when HOST=null.
+
+    --local     (false, Boolean)
+                Does not open to volunteers but loads the module, and directly
+                processes items one-by-one.  Useful for testing the module
+                on a few sample items.
+
+    --start-idle (true, Boolean)
+                Whether items should be processed while waiting for
+                volunteers to connect. Set to false for to compute while waiting
+                for new volunteers.
+
+    --stdin     (false, Boolean)
+                Read items from standard input instead, one item per line
+
+    --secret=S  (true, S='INSECURE-SECRET', String)
+                Alphanumeric string used to connect to the bootstrap server
+                as root (and only root). Should be the same as the one
+                supplied to pando-server.  Does not matter when not
+                communicating with a public server.
+
+    --sync-stdio (false, Boolean)
+                Uses pull-sync on the input and output of the Pando process.
+                Makes Pando transparently act as a transformer in other
+                processes (also using pull-sync). Implies --stdin=true.
+
+    --version   (false, Boolean)
+                Prints the version number.
+
+ADVANCED (used for testing, development, and optimization):
+
+    --batch-size=B (true, B=1, Number)
+                Number of inputs to send per known processor. If the inputs
+                are fast to process this number should be higher, otherwise
+                it should be low. To maximize the throughput, this number
+                should the lowest that still ensures that the fastest
+                processors are kept busy all the time.
+
+    --bootstrap-timeout=T (true, T=60, Number)
+                Maximum time allowed for a new volunteer to establish a
+                successful connection (in seconds).
+
+    --degree=D  (true, D=10, Number)
+                Maximum degree of the root (started by this command) and
+                each other connected volunteer. When new volunteers request
+                a connection to a node that has reached the maximum degree,
+                the connection is delegated to one of its children.
+
+    --global-monitoring (false)
+                Each volunteer maintains an additional WebSocket connection to
+                the pando-server to report its status. All statuses are
+                combined and reported as additional information on the
+                monitoring page.
+
+    --heartbeat=HB (HB=30000, Number)
+                Heartbeat interval in milliseconds to validate a connection is
+                still valid. A connection error, such as a sudden wifi disconnection, 
+                can therefore be detected in at most 2*HB.
+
+    --ice-servers=URLS (true, URLS='stun:stun.l.google.com:19302', String)
+                Comma-separated list of ice servers used to establish the WebRTC
+                connections.
+
+    --reporting-interval=I (true, I=3, Number)
+                Interval in seconds between the status updates given by nodes.
+
+    --seed=SEED (true, SEED=RandomInt, Number) 
+                Seed used to assign identifiers to the node channels with
+                which they communicate. Providing an integer makes the identifiers
+                deterministic and replicable.
+
+ITEMS can be numbers, or strings:
+    * Numbers are mapped to JavaScript numbers;
+    * Otherwise the literal item is mapped to a JavaScript string.
+
+MONITORING (on standard error):
+
+    DEBUG='pando-computing'  
+                Debugging information about the internal behaviour of Pando.
+    DEBUG='pando-computing:monitoring'  
+                Monitoring information about participating devices.
+    DEBUG='pando-computing*'
+                All Pando-related information. 
